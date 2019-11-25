@@ -191,8 +191,10 @@ def query(nsid, tunoip, begin_time=None, end_time=None, data_dir='./data'):
     if type(begin_time) is str: begin_time = datetime.datetime.fromisoformat(begin_time)
     if type(end_time) is str: end_time = datetime.datetime.fromisoformat(end_time)
     nowtime = datetime.datetime.now()
+    pretime = nowtime - datetime.timedelta(days=30)
+
     if end_time is None: end_time = nowtime
-    if begin_time is None: begin_time = nowtime - datetime.timedelta(days=30)
+    if begin_time is None: begin_time = pretime
     q_begin_time, q_end_time = begin_time, end_time
     if not os.path.exists(data_dir): os.mkdir(data_dir)
     nsid_dir = os.path.join(data_dir, nsid)
@@ -205,11 +207,18 @@ def query(nsid, tunoip, begin_time=None, end_time=None, data_dir='./data'):
     if os.path.exists(csv_path):
         logging.info('Read data from %s'%csv_path)
         df = pd.read_csv(csv_path)
-        begin_time = datetime.datetime.fromisoformat(df.iloc[-1]['timestamp']) + datetime.timedelta(minutes=1)
         logging.info('Time range: [{}, {}]'.format(df.iloc[0]['timestamp'], df.iloc[-1]['timestamp']))
+        begin_time = datetime.datetime.fromisoformat(df.iloc[-1]['timestamp']) + datetime.timedelta(minutes=1)
+        if begin_time < pretime:
+            begin_time = pretime
+        df.index = pd.to_datetime(df['timestamp'])
+        p_num = len(df)
+        if df.index[0] < pretime:
+            df = df.loc[pretime:]
+            logging.info('Forget %d records'%(p_num-len(df)))
     else:
         df = pd.DataFrame(columns=keys)
-        begin_time = nowtime - datetime.timedelta(days=30)
+        begin_time = pretime
     # if nowtime - end_time < datetime.timedelta(hours=1):
     #     tmp_end_time = end_time - datetime.timedelta(hours=1)
     # else:
