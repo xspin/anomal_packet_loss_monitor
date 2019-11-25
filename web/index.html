@@ -1,0 +1,84 @@
+<html>
+<head>
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico" />
+    <title>链路丢包异常检测</title>
+    <script src="js/plotly-latest.min.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/monitor.css">
+</head>
+
+<body>
+<h2>链路质量告警查询</h2>
+    <div id='loading'><img id="loading-image" src="img/loading.gif" alt="Loading..." />
+        <div id='timer' style="margin-top: -70px;"></div>
+        <div><p><b>注：首次查询的链路需要等待数分钟获取数据</b></p></div>
+    </div>
+    <div id="panel">
+        <form id='form_select' name='form_select' action='select' method="POST" onsubmit="return select_submit()">
+            <select id='nsid' name='nsid' onchange="set_tunip()">
+            <option value="0">选择项目</option>
+            </select>
+            <select id='tunip' name='tunip'>
+            <option value="0">选择链路</option>
+            </select>
+            <select id='method' name='method' onmouseup="$('#setting_panel').hide()">
+            <option value="hpsad">①历史周期统计数据动态阈值算法</option>
+            <option value="tdd">②基于DBSCAN的动态双阈值算法</option>
+            </select>
+            <button type='button' onclick="setting()">参数设置
+            <button class='blue' type="submit"><img src='img/favicon.ico' width="12px"/> 确定</button>   
+        </form>
+    </div>
+    <div id='setting_panel'>
+        <form id='form_setting' action='setting' method="POST" onsubmit="return setting_submit()">
+            <ul id='ul_setting'>
+            </ul>
+            <div style="text-align: center;">
+            <button type="button" onclick="$('#setting_panel').hide()"> 取消 </button> 
+            <button class="blue" type="submit" style="margin-left: 10px;">确定</button>  
+            </div>
+        </form>
+    </div>
+    <div class="graph">
+        <div id="graph"></div>
+        <div class="range">
+        <ul>
+            <li>
+                <div class='yrange'>
+                <span class='label' id='ymax_label'>调节丢包率纵轴</span>
+                <input class='input' id='ymax' type='range' min="10" max="100" value="100" onmousemove="change_ymax()">
+                <span id='ymax_value'></span>
+                </div>
+            </li>
+            <li>
+                <div class='yrange'>
+                <span class='label' id='delay_ymax_label'>调节时延纵轴</span>
+                <input class='input' id='delay_ymax' type='range' min="100" max="10000" value="1000" onmousemove="change_delay_ymax()">
+                <span id='delay_ymax_value'></span>
+                </div>
+            </li>
+        </ul>
+        </div>
+    </div>
+    <div id='help_icon'>
+        <img src="img/help.png" alt="help" width="30px" onmouseover="$('#help').show()" onmouseout="$('#help').hide()"/> 
+    </div>
+    <div id='help'>
+        <span id='tips'>Tips</span> 
+        <ul>
+            <li>可点击图例显示或隐藏相应项</li>
+            <li>可在图上用鼠标选取时间范围</li>
+            <li>最下方的图可拖拉左右两端调整显示范围</li>
+            <li>双击图恢复默认显示范围，再次双击显示所有范围</li>
+        </ul>
+    </div>
+    <div id='background'>
+        <img src='img/mark.png' width="300px"/>
+    </div>
+</body>
+<script src="js/monitor.js"></script>
+<script>
+    init();
+</script>
+
+</html>
